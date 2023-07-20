@@ -3,12 +3,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
+
 void main() {
   runApp(const MyApp());
 }
 
 List<String> feedItems = [];
 List<String> feedId = [];
+List<String> feedId_database = [];
+List<String> feedId_github = [];
 
 class CustomFloatingActionButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -43,6 +46,7 @@ class MyApp extends StatelessWidget {
       title: 'Dark Matter',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
+        scaffoldBackgroundColor: Colors.black,
       ),
       home: const MyHomePage(title: 'Dark Matter Controller'),
     );
@@ -58,17 +62,25 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var driveurl;
+  bool check_getfiles_getfiles_database = true;
+  bool check_github = true;
   String serverurl = 'original-google.onrender.com';
   Color fabColor = Colors.blue;
   Timer? periodicTimer; // Timer instance
   Map<String, bool> buttonStatusMap = {};
+  Map<String, bool> buttonStatusMap_database = {};
+  Map<String, bool> buttonStatusMap_github = {};
 
-  void getHttp() async {
+  void getfiles() async {
     try {
+      check_getfiles_getfiles_database = true;
+      check_github = true ;
       var uri = Uri.https(serverurl, '/getfiles');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         debugPrint(response.body.toString());
+        feedId.clear();
+        feedItems.clear();
         List<dynamic> jsonList = json.decode(response.body.toString());
         for (var item in jsonList) {
           if (item['mimeType'] != 'application/vnd.google-apps.folder') {
@@ -92,11 +104,67 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void getHttp2() {
+  void getfiles_database() async {
+    try {
+      check_getfiles_getfiles_database = false;
+      var uri = Uri.https(serverurl, '/movie_data');
+      http.Response response = await http.get(uri);
+      if (response.statusCode == 200) {
+        debugPrint(response.body.toString());
+        feedItems.clear();
+        feedId.clear();
+        List<dynamic> jsonList = json.decode(response.body.toString());
+        for (var item in jsonList) {
+          String name = item['movie_name'];
+          feedItems.add('$name');
+          feedId.add('$name');
+        }
+        print(feedItems);
+        setState(() {
+          buttonStatusMap_database = Map.fromIterable(feedId_database,
+              key: (id) => id, value: (_) => true);
+        });
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+ void getfiles_github() async {
+    try {
+      check_github = false;
+      var uri = Uri.https(serverurl, '/getrepo');
+      http.Response response = await http.get(uri);
+      if (response.statusCode == 200) {
+        debugPrint(response.body.toString());
+        feedItems.clear();
+        feedId.clear();
+        List<dynamic> jsonList = json.decode(response.body.toString());
+        List<String> extractedData = List<String>.from(jsonList);
+        for (String element in extractedData) {
+          print(element);
+          feedItems.add('$element');
+          feedId.add('$element');
+        }
+
+        setState(() {
+          buttonStatusMap_github = Map.fromIterable(feedId_github,
+              key: (id) => id, value: (_) => true);
+        });
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void online_test_url() {
     void fetchStatus() async {
       try {
-        final response =
-            await http.get(Uri.parse('https://'+serverurl));
+        final response = await http.get(Uri.parse('https://' + serverurl));
         if (response.statusCode == 200) {
           setState(() {
             fabColor = Colors.green;
@@ -119,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void getHttp3(var para) async {
+  void createrepo(var para) async {
     try {
       var uri = Uri.https(serverurl, '/createrepo', {
         'fileid': para,
@@ -135,7 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void getHttp4(var para) async {
+  void deletefile(var para) async {
     try {
       var uri = Uri.https(serverurl, '/deletefile', {
         'file_id': para,
@@ -143,9 +211,10 @@ class _MyHomePageState extends State<MyHomePage> {
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
-        // If the deletion was successful, refresh the widget by calling getHttp()
+        // If the deletion was successful, refresh the widget by calling getfiles()
         setState(() {
-          buttonStatusMap[para] = false; // Assuming the item was deleted successfully
+          buttonStatusMap[para] =
+              false; // Assuming the item was deleted successfully
         });
       } else {
         print('Request failed with status: ${response.statusCode}');
@@ -172,6 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   String id = feedId[index];
                   bool isButtonEnabled = buttonStatusMap[id] ?? true;
                   return Card(
+                    color: Colors.white,
                     child: Column(
                       children: [
                         ListTile(
@@ -179,13 +249,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             feedItems[index],
                           ),
                         ),
+                        if(check_getfiles_getfiles_database && check_github)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ElevatedButton(
                               onPressed: isButtonEnabled
                                   ? () {
-                                      getHttp3(id);
+                                      createrepo(id);
                                     }
                                   : null,
                               style: ElevatedButton.styleFrom(
@@ -196,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             ElevatedButton(
                               onPressed:
-                                  isButtonEnabled ? () => getHttp4(id) : null,
+                                  isButtonEnabled ? () => deletefile(id) : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     isButtonEnabled ? Colors.red : Colors.grey,
@@ -218,15 +289,28 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           CustomFloatingActionButton(
-            onPressed: getHttp2,
+            onPressed: online_test_url,
             backgroundColor: fabColor,
             icon: Icons.power,
           ),
           SizedBox(height: 12), // Adjust the spacing between the FABs
           CustomFloatingActionButton(
-            onPressed: getHttp,
+            onPressed: getfiles,
             backgroundColor: Colors.orange, // Set the desired background color
-            icon: Icons.add, // Set the desired icon
+            icon: Icons.file_copy_sharp, // Set the desired icon
+          ),
+          SizedBox(height: 12), // Adjust the spacing between the FABs
+          CustomFloatingActionButton(
+            onPressed: getfiles_database,
+            backgroundColor:
+                Colors.blueAccent, // Set the desired background color
+            icon: Icons.data_array, // Set the desired icon
+          ),
+          SizedBox(height: 12), // Adjust the spacing between the FABs
+          CustomFloatingActionButton(
+            onPressed: getfiles_github,
+            backgroundColor: Colors.black38,
+            icon: Icons.data_array, // Use the GitHub icon from flutter_icons
           ),
         ],
       ),
