@@ -62,8 +62,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var driveurl;
-  bool check_getfiles_getfiles_database = true;
-  bool check_github = true;
+  bool variable_for_button1 = true;
+  bool variable_for_button2 = true;
   String serverurl = 'original-google.onrender.com';
   Color fabColor = Colors.blue;
   Timer? periodicTimer; // Timer instance
@@ -73,8 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getfiles() async {
     try {
-      check_getfiles_getfiles_database = true;
-      check_github = true ;
+      variable_for_button1 = true;
+      variable_for_button2 = true;
       var uri = Uri.https(serverurl, '/getfiles');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -106,7 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getfiles_database() async {
     try {
-      check_getfiles_getfiles_database = false;
+      variable_for_button1 = false;
+      variable_for_button2 = false;
       var uri = Uri.https(serverurl, '/movie_data');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -134,7 +135,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
  void getfiles_github() async {
     try {
-      check_github = false;
+      variable_for_button2 = true;
+      variable_for_button1 = false;
       var uri = Uri.https(serverurl, '/getrepo');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
@@ -192,16 +194,22 @@ class _MyHomePageState extends State<MyHomePage> {
       var uri = Uri.https(serverurl, '/createrepo', {
         'fileid': para,
       });
-      http.Response response = await http.get(uri);
-      if (response.statusCode == 200) {
-        var jsonResponse = json.decode(response.body);
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-      }
+      await http.get(uri);
     } catch (e) {
       print('Error: $e');
     }
   }
+  void rerunworkflow(var para) async {
+    try {
+      var uri = Uri.https(serverurl, '/workflow', {
+        'workflowrepo': para,
+      });
+      await http.get(uri);
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   void deletefile(var para) async {
     try {
@@ -210,7 +218,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
-        var jsonResponse = json.decode(response.body);
         // If the deletion was successful, refresh the widget by calling getfiles()
         setState(() {
           buttonStatusMap[para] =
@@ -249,22 +256,21 @@ class _MyHomePageState extends State<MyHomePage> {
                             feedItems[index],
                           ),
                         ),
-                        if(check_getfiles_getfiles_database && check_github)
+                        if(variable_for_button1 || variable_for_button2)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ElevatedButton(
-                              onPressed: isButtonEnabled
-                                  ? () {
-                                      createrepo(id);
-                                    }
-                                  : null,
+                              onPressed: (variable_for_button1 || variable_for_button2)
+                                  ? () => rerunworkflow(id)
+                                  : () => createrepo(id),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     isButtonEnabled ? Colors.blue : Colors.grey,
                               ),
                               child: Text('Upload'), /*$index*/
                             ),
+                            if(variable_for_button1 && variable_for_button2)
                             ElevatedButton(
                               onPressed:
                                   isButtonEnabled ? () => deletefile(id) : null,
