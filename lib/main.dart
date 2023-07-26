@@ -249,7 +249,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: feedItems.length,
                 itemBuilder: (context, index) {
                   String id = feedId[index];
-                  bool check =  feed_check[index];
                   bool isButtonEnabled = buttonStatusMap[id] ?? true;
                   return Card(
                     color: Colors.white,
@@ -288,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         if (variable_for_button1 && variable_for_button2)
                         Icon(
                           Icons.star,
-                          color: check ? Colors.green : Colors.red,
+                          color: feed_check[index] ? Colors.green : Colors.red,
                         ),
                       ],
                     ),
