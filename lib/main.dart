@@ -12,6 +12,7 @@ List<String> feedItems = [];
 List<String> feedId = [];
 List<String> feedId_database = [];
 List<String> feedId_github = [];
+List<bool> feed_check = [];
 
 class CustomFloatingActionButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -48,7 +49,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const MyHomePage(title: 'Dark Matter Controller'),
+      home: const MyHomePage(title: 'Dark Matter'),
     );
   }
 }
@@ -64,23 +65,24 @@ class _MyHomePageState extends State<MyHomePage> {
   var driveurl;
   bool variable_for_button1 = true;
   bool variable_for_button2 = true;
-  String serverurl = 'original-google.onrender.com';
+  String serverurl = 'ecce-49-35-138-84.ngrok-free.app';
   Color fabColor = Colors.blue;
   Timer? periodicTimer; // Timer instance
   Map<String, bool> buttonStatusMap = {};
   Map<String, bool> buttonStatusMap_database = {};
   Map<String, bool> buttonStatusMap_github = {};
 
-  void getfiles() async {
+  void getvidfiles() async {
     try {
       variable_for_button1 = true;
       variable_for_button2 = true;
-      var uri = Uri.https(serverurl, '/getfiles');
+      var uri = Uri.https(serverurl, '/getmappeddata');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         debugPrint(response.body.toString());
         feedId.clear();
         feedItems.clear();
+        feed_check.clear();
         List<dynamic> jsonList = json.decode(response.body.toString());
         for (var item in jsonList) {
           if (item['mimeType'] != 'application/vnd.google-apps.folder') {
@@ -88,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
             String id = item['id'];
             feedItems.add('$name'); /*$name - $id*/
             feedId.add('$id');
+            feed_check.add(item['check']);
           }
         }
         print(feedItems);
@@ -133,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
- void getfiles_github() async {
+  void getfiles_github() async {
     try {
       variable_for_button2 = true;
       variable_for_button1 = false;
@@ -218,10 +221,10 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
-        // If the deletion was successful, refresh the widget by calling getfiles()
+        // If the deletion was successful, refresh the widget by calling getvidfiles()
         setState(() {
           buttonStatusMap[para] =
-              false; // Assuming the item was deleted successfully
+          false; // Assuming the item was deleted successfully
         });
       } else {
         print('Request failed with status: ${response.statusCode}');
@@ -246,6 +249,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemCount: feedItems.length,
                 itemBuilder: (context, index) {
                   String id = feedId[index];
+                  bool check =  feed_check[index];
                   bool isButtonEnabled = buttonStatusMap[id] ?? true;
                   return Card(
                     color: Colors.white,
@@ -256,31 +260,35 @@ class _MyHomePageState extends State<MyHomePage> {
                             feedItems[index],
                           ),
                         ),
-                        if(variable_for_button1 || variable_for_button2)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                              onPressed: (variable_for_button1 || variable_for_button2)
-                                  ? () => rerunworkflow(id)
-                                  : () => createrepo(id),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    isButtonEnabled ? Colors.blue : Colors.grey,
+                        if (variable_for_button1 || variable_for_button2)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                onPressed: (variable_for_button1 || variable_for_button2)
+                                    ? () => rerunworkflow(id)
+                                    : () => createrepo(id),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                  isButtonEnabled ? Colors.blue : Colors.grey,
+                                ),
+                                child: Text('Upload'), /*$index*/
                               ),
-                              child: Text('Upload'), /*$index*/
-                            ),
-                            if(variable_for_button1 && variable_for_button2)
-                            ElevatedButton(
-                              onPressed:
-                                  isButtonEnabled ? () => deletefile(id) : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
+                              if (variable_for_button1 && variable_for_button2)
+                                ElevatedButton(
+                                  onPressed: isButtonEnabled ? () => deletefile(id) : null,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
                                     isButtonEnabled ? Colors.red : Colors.grey,
-                              ),
-                              child: Text('Remove'),
-                            ),
-                          ],
+                                  ),
+                                  child: Text('Remove'),
+                                ),
+                            ],
+                          ),
+                        if (variable_for_button1 && variable_for_button2)
+                        Icon(
+                          Icons.star,
+                          color: check ? Colors.green : Colors.red,
                         ),
                       ],
                     ),
@@ -301,7 +309,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           SizedBox(height: 12), // Adjust the spacing between the FABs
           CustomFloatingActionButton(
-            onPressed: getfiles,
+            onPressed: getvidfiles,
             backgroundColor: Colors.orange, // Set the desired background color
             icon: Icons.file_copy_sharp, // Set the desired icon
           ),
@@ -309,7 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
           CustomFloatingActionButton(
             onPressed: getfiles_database,
             backgroundColor:
-                Colors.blueAccent, // Set the desired background color
+            Colors.blueAccent, // Set the desired background color
             icon: Icons.data_array, // Set the desired icon
           ),
           SizedBox(height: 12), // Adjust the spacing between the FABs
