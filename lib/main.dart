@@ -90,7 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
             String id = item['id'];
             feedItems.add('$name'); /*$name - $id*/
             feedId.add('$id');
-            feed_check.add(item['check']);
+            if (item.containsKey('check')) {
+              feed_check.add(item['check']);
+            }
+            else {
+              feed_check.add(false);
+              }
           }
         }
         print(feedItems);
