@@ -44,12 +44,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Dark Matter',
+      title: 'CORE :: Controller',
       theme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const MyHomePage(title: 'Dark Matter'),
+      home: const MyHomePage(title: 'CORE :: Controller'),
     );
   }
 }
@@ -65,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var driveurl;
   bool variable_for_button1 = true;
   bool variable_for_button2 = true;
-  String serverurl = 'original-google.onrender.com';
+  String serverurl = 'tahr-eminent-exactly.ngrok-free.app';
   Color fabColor = Colors.blue;
   Timer? periodicTimer; // Timer instance
   Map<String, bool> buttonStatusMap = {};
@@ -104,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonStatusMap =
               Map.fromIterable(feedId, key: (id) => id, value: (_) => true);
         });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Fetched")));
       } else {
         print('Request failed with status: ${response.statusCode}');
       }
@@ -133,6 +136,38 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonStatusMap_database = Map.fromIterable(feedId_database,
               key: (id) => id, value: (_) => true);
         });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Fetched")));
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void tele_files() async {
+    try {
+      variable_for_button1 = false;
+      variable_for_button2 = false;
+      var uri = Uri.https('2do0758cbf.execute-api.ap-southeast-2.amazonaws.com', '/default/TELECORE', {'limit': '500', 'user1_to_bot': 'true'});
+      http.Response response = await http.get(uri);
+      if (response.statusCode == 200) {
+        feedItems.clear();
+        feedId.clear();
+        List<dynamic> jsonList = json.decode(response.body.toString());
+        for (var item in jsonList) {
+          String name = item['file_name'];
+          feedItems.add('$name');
+          feedId.add('$name');
+        }
+        print(feedItems);
+        setState(() {
+          buttonStatusMap_database = Map.fromIterable(feedId_database,
+              key: (id) => id, value: (_) => true);
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Fetched")));
       } else {
         print('Request failed with status: ${response.statusCode}');
       }
@@ -163,6 +198,8 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonStatusMap_github = Map.fromIterable(feedId_github,
               key: (id) => id, value: (_) => true);
         });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Fetched")));
       } else {
         print('Request failed with status: ${response.statusCode}');
       }
@@ -231,6 +268,8 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonStatusMap[para] =
           false; // Assuming the item was deleted successfully
         });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Fetched")));
       } else {
         print('Request failed with status: ${response.statusCode}');
       }
@@ -256,7 +295,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   String id = feedId[index];
                   bool isButtonEnabled = buttonStatusMap[id] ?? true;
                   return Card(
-                    color: Colors.white,
+                    color: Colors.black38,
                     child: Column(
                       children: [
                         ListTile(
@@ -303,34 +342,67 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          CustomFloatingActionButton(
-            onPressed: online_test_url,
-            backgroundColor: fabColor,
-            icon: Icons.power,
-          ),
-          SizedBox(height: 12), // Adjust the spacing between the FABs
-          CustomFloatingActionButton(
-            onPressed: getvidfiles,
-            backgroundColor: Colors.orange, // Set the desired background color
-            icon: Icons.file_copy_sharp, // Set the desired icon
-          ),
-          SizedBox(height: 12), // Adjust the spacing between the FABs
-          CustomFloatingActionButton(
-            onPressed: getfiles_database,
-            backgroundColor:
-            Colors.blueAccent, // Set the desired background color
-            icon: Icons.data_array, // Set the desired icon
-          ),
-          SizedBox(height: 12), // Adjust the spacing between the FABs
-          CustomFloatingActionButton(
-            onPressed: getfiles_github,
-            backgroundColor: Colors.black38,
-            icon: Icons.data_array, // Use the GitHub icon from flutter_icons
-          ),
-        ],
+      floatingActionButton: Align(
+        alignment: Alignment.centerRight,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            CustomFloatingActionButton(
+              onPressed: online_test_url,
+              backgroundColor: fabColor,
+              icon: Icons.power,
+            ),
+            SizedBox(height: 12),
+            RawMaterialButton(
+              onPressed: getvidfiles,
+              elevation: 2.0,
+              fillColor: Colors.transparent,
+              child: Image.asset(
+                'assets/drive.png',
+                width: 50,
+                height: 50,
+              ),
+              shape: CircleBorder(),
+            ),
+            SizedBox(height: 12),
+            RawMaterialButton(
+              onPressed: getfiles_database,
+              elevation: 2.0,
+              fillColor: Colors.transparent,
+              child: Image.asset(
+                'assets/mongo.png',
+                width: 50,
+                height: 50,
+              ),
+              shape: CircleBorder(),
+            ),
+            SizedBox(height: 12),
+            RawMaterialButton(
+              onPressed: getfiles_github,
+              elevation: 2.0,
+              fillColor: Colors.transparent,
+              child: Image.asset(
+                'assets/github.png',
+                width: 50,
+                height: 50,
+              ),
+              shape: CircleBorder(),
+            ),
+            SizedBox(height: 12),
+            RawMaterialButton(
+              onPressed: tele_files,
+              elevation: 2.0,
+              fillColor: Colors.transparent,
+              child: Image.asset(
+                'assets/telegram.png',
+                width: 50,
+                height: 50,
+              ),
+              shape: CircleBorder(),
+            ),
+            SizedBox(height: 80),
+          ],
+        ),
       ),
     );
   }
