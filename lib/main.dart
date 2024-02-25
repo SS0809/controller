@@ -63,18 +63,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController serverAddressController = TextEditingController();
+  TextEditingController serverAddressController2 = TextEditingController();
   var driveurl;
   bool variable_for_button1 = true;
   bool variable_for_button2 = true;
-  String serverurl = 'tahr-eminent-exactly.ngrok-free.app';
+  String serverurl = '';
   Color fabColor = Colors.blue;
   Timer? periodicTimer; // Timer instance
   Map<String, bool> buttonStatusMap = {};
   Map<String, bool> buttonStatusMap_database = {};
   Map<String, bool> buttonStatusMap_github = {};
 
+
+  bool isTextFieldVisible = false;
+
+  void toggleTextFieldVisibility() {
+    setState(() {
+      isTextFieldVisible = !isTextFieldVisible;
+    });
+  }
+
   void getvidfiles() async {
     try {
+      serverurl = serverAddressController.text;
       variable_for_button1 = true;
       variable_for_button2 = true;
       var uri = Uri.https(serverurl, '/getmappeddata');
@@ -117,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getfiles_database() async {
     try {
+      serverurl = serverAddressController.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
       var uri = Uri.https(serverurl, '/movie_data');
@@ -148,9 +161,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void tele_files() async {
     try {
+      serverurl = serverAddressController2.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
-      var uri = Uri.https('2do0758cbf.execute-api.ap-southeast-2.amazonaws.com', '/default/TELECORE', {'limit': '500', 'user1_to_bot': 'true'});
+      var uri = Uri.https(serverurl, '/default/TELECORE', {'limit': '500', 'user1_to_bot': 'true'});
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         feedItems.clear();
@@ -178,6 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getfiles_github() async {
     try {
+      serverurl = serverAddressController.text;
       variable_for_button2 = true;
       variable_for_button1 = false;
       var uri = Uri.https(serverurl, '/getrepo');
@@ -211,6 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void online_test_url() {
     void fetchStatus() async {
       try {
+        serverurl = serverAddressController.text;
         final response = await http.get(Uri.parse('https://' + serverurl));
         if (response.statusCode == 200) {
           setState(() {
@@ -236,6 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void createrepo(var para) async {
     try {
+      serverurl = serverAddressController.text;
       var uri = Uri.https(serverurl, '/createrepo', {
         'fileid': para,
       });
@@ -246,6 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   void rerunworkflow(var para) async {
     try {
+      serverurl = serverAddressController.text;
       var uri = Uri.https(serverurl, '/workflow', {
         'workflowrepo': para,
       });
@@ -258,6 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void deletefile(var para) async {
     try {
+      serverurl = serverAddressController.text;
       var uri = Uri.https(serverurl, '/deletefile', {
         'file_id': para,
       });
@@ -277,17 +296,53 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Error: $e');
     }
   }
+  @override
+  void initState() {
+    super.initState();
+    serverurl = serverAddressController.text;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: GestureDetector(
+          onTap: toggleTextFieldVisibility,
+          child: Text(widget.title),
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Visibility(
+              visible: isTextFieldVisible,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextField(
+                      controller: serverAddressController,
+                      decoration: InputDecoration(
+                        labelText: 'Server Address 1',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: TextField(
+                      controller: serverAddressController2,
+                      decoration: InputDecoration(
+                        labelText: 'Server Address 2',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: feedItems.length,
@@ -329,10 +384,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                           ),
                         if (variable_for_button1 && variable_for_button2)
-                        Icon(
-                          Icons.star,
-                          color: feed_check[index] ? Colors.green : Colors.red,
-                        ),
+                          Icon(
+                            Icons.star,
+                            color: feed_check[index] ? Colors.green : Colors.red,
+                          ),
                       ],
                     ),
                   );
@@ -405,5 +460,4 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
-  }
-}
+  }}
