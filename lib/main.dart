@@ -62,10 +62,15 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with TickerProviderStateMixin {
+  late AnimationController controller = AnimationController(vsync: this);
+  bool determinate = false;
+
   TextEditingController serverAddressController = TextEditingController();
   TextEditingController serverAddressController2 = TextEditingController();
   var driveurl;
+  bool hide_progess_indicator = false;
   bool variable_for_button1 = true;
   bool variable_for_button2 = true;
   String serverurl = '';
@@ -86,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void getvidfiles() async {
     try {
+      hide_progess_indicator = true;
       serverurl = serverAddressController.text;
       variable_for_button1 = true;
       variable_for_button2 = true;
@@ -125,10 +131,12 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error: $e');
     }
+    hide_progess_indicator = false;
   }
 
   void getfiles_database() async {
     try {
+      hide_progess_indicator = true;
       serverurl = serverAddressController.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
@@ -157,10 +165,12 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error: $e');
     }
+    hide_progess_indicator = false;
   }
 
   void tele_files() async {
     try {
+      hide_progess_indicator = true;
       serverurl = serverAddressController2.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
@@ -188,10 +198,12 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error: $e');
     }
+    hide_progess_indicator = false;
   }
 
   void getfiles_github() async {
     try {
+      hide_progess_indicator = true;
       serverurl = serverAddressController.text;
       variable_for_button2 = true;
       variable_for_button1 = false;
@@ -221,11 +233,13 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error: $e');
     }
+    hide_progess_indicator = false;
   }
 
   void online_test_url() {
     void fetchStatus() async {
       try {
+        hide_progess_indicator = true;
         serverurl = serverAddressController.text;
         final response = await http.get(Uri.parse('https://' + serverurl));
         if (response.statusCode == 200) {
@@ -242,6 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
           fabColor = Colors.red;
         });
       }
+      hide_progess_indicator = false;
     }
 
     periodicTimer = Timer.periodic(Duration(seconds: 30), (_) {
@@ -298,9 +313,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   @override
   void initState() {
-    super.initState();
     serverurl = serverAddressController.text;
-  }
+    controller = AnimationController(
+    /// [AnimationController]s can be created with `vsync: this` because of
+    /// [TickerProviderStateMixin].
+    vsync: this,
+    duration: const Duration(seconds: 2),
+    )..addListener(() {
+    setState(() {});
+    });
+    controller.repeat(reverse: true);
+    super.initState();
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -310,6 +334,14 @@ class _MyHomePageState extends State<MyHomePage> {
           onTap: toggleTextFieldVisibility,
           child: Text(widget.title),
         ),
+        bottom: hide_progess_indicator ? PreferredSize(
+          preferredSize: Size(double.infinity, 1.0),
+          child: LinearProgressIndicator(
+            value: controller.value,
+            semanticsLabel: 'Linear progress indicator',
+          ),
+        ) : null,
+
       ),
       body: Center(
         child: Column(
