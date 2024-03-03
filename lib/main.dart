@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage>
       serverurl = serverAddressController.text;
       variable_for_button1 = true;
       variable_for_button2 = true;
-      var uri = Uri.https(serverurl, '/getmappeddata');
+      var uri = Uri.http(serverurl, '/getmappeddata');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         debugPrint(response.body.toString());
@@ -140,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage>
       serverurl = serverAddressController.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
-      var uri = Uri.https(serverurl, '/movie_data');
+      var uri = Uri.http(serverurl, '/movie_data');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         debugPrint(response.body.toString());
@@ -174,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage>
       serverurl = serverAddressController2.text;
       variable_for_button1 = false;
       variable_for_button2 = false;
-      var uri = Uri.https(serverurl, '/default/TELECORE', {'limit': '500', 'user1_to_bot': 'true'});
+      var uri = Uri.http(serverurl, '/default/TELECORE', {'limit': '500', 'user1_to_bot': 'true'});
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         feedItems.clear();
@@ -207,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage>
       serverurl = serverAddressController.text;
       variable_for_button2 = true;
       variable_for_button1 = false;
-      var uri = Uri.https(serverurl, '/getrepo');
+      var uri = Uri.http(serverurl, '/getrepo');
       http.Response response = await http.get(uri);
       if (response.statusCode == 200) {
         debugPrint(response.body.toString());
@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage>
       try {
         hide_progess_indicator = true;
         serverurl = serverAddressController.text;
-        final response = await http.get(Uri.parse('https://' + serverurl));
+        final response = await http.get(Uri.parse('http://' + serverurl));
         if (response.statusCode == 200) {
           setState(() {
             fabColor = Colors.green;
@@ -268,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage>
   void createrepo(var para) async {
     try {
       serverurl = serverAddressController.text;
-      var uri = Uri.https(serverurl, '/createrepo', {
+      var uri = Uri.http(serverurl, '/createrepo', {
         'fileid': para,
       });
       await http.get(uri);
@@ -279,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage>
   void rerunworkflow(var para) async {
     try {
       serverurl = serverAddressController.text;
-      var uri = Uri.https(serverurl, '/workflow', {
+      var uri = Uri.http(serverurl, '/workflow', {
         'workflowrepo': para,
       });
       await http.get(uri);
@@ -292,7 +292,7 @@ class _MyHomePageState extends State<MyHomePage>
   void deletefile(var para) async {
     try {
       serverurl = serverAddressController.text;
-      var uri = Uri.https(serverurl, '/deletefile', {
+      var uri = Uri.http(serverurl, '/deletefile', {
         'file_id': para,
       });
       http.Response response = await http.get(uri);
